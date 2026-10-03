@@ -6,9 +6,7 @@ A collection of my Bash, Jamf, and Python scripts.
 
 ## Contents
 
-Each script keeps its own usage notes in a header comment.
-
-- **[Erase-And-Delete-Devices.sh](Erase-And-Delete-Devices.sh)** — Admin tool (run from a managed Mac via Jamf) that pulls managed computers from the Jamf Pro API, lets an admin pick one or more from a searchable swiftDialog list, queues an `EraseDevice` MDM command to each, and then deletes the Jamf record. Optional Microsoft Entra cleanup removes the matching device object via Graph so the Mac can re-register with Platform SSO / Company Portal. Ships as a template: fill in the `REPLACE_ME` values (org identity, Jamf API client, optional Entra app) before use.
+See **[CONTENTS.md](CONTENTS.md)** for the list of scripts and what each one does. Each script also keeps its own usage notes in a header comment.
 
 ## Requirements
 
