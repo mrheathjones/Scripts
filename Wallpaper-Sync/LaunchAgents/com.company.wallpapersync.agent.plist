@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    com.company.wallpapersync.agent.plist   (REFERENCE COPY)
+
+    NOTE: Deploy-Wallpaper-Sync.sh generates this plist automatically, per user,
+    into ~/Library/LaunchAgents with the user's literal home path and the
+    Label ${ORG_PLIST_DOMAIN}.wallpapersync.agent. This file documents the
+    shape of that generated plist; you do not need to deploy it separately.
+
+    >>> EDIT ME <<<  Replace "company" in the Label AND the filename with your
+    org identifier so it matches ORG_PLIST_DOMAIN in the scripts and the
+    RuleValue in ManagedLoginItems-wallpapersync.mobileconfig. All three must
+    reference the SAME Label: com.<org>.wallpapersync.agent
+
+    Runs in the logged-in user's context (LaunchAgent, not LaunchDaemon).
+    Event-triggered via WatchPaths on the wallpaper store — no polling.
+    RunAtLoad is true so JCL reflects the current wallpaper immediately at
+    load (login / install), not just after the next wallpaper change.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.company.wallpapersync.agent</string>
+
+    <!--
+        The script must live at a path readable/executable in user context and
+        be marked executable (chmod 755). "CompanyName" is ORG_NAME (the
+        ORG_NAME_FRIENDLY value with spaces removed). Update if you install
+        elsewhere.
+    -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Library/Application Support/CompanyName/WallpaperSync/Wallpaper-Sync.sh</string>
+    </array>
+
+    <!--
+        WatchPaths: fire whenever the user's wallpaper changes.
+
+        CHANGE_ME: USERNAME below is a placeholder for the user's short name.
+        launchd does NOT reliably expand '~' in WatchPaths / StandardOutPath /
+        StandardErrorPath, and an unresolved tilde stops the job from spawning
+        (RunAtLoad never fires). Use the LITERAL home path and install the
+        plist per user into ~/Library/LaunchAgents (the installer does this).
+
+        macOS 14+ writes com.apple.wallpaper/Store/Index.plist on a wallpaper
+        change; macOS 13 updates Dock/desktoppicture.db. Watch both.
+    -->
+    <key>WatchPaths</key>
+    <array>
+        <string>/Users/USERNAME/Library/Application Support/com.apple.wallpaper/Store/Index.plist</string>
+        <string>/Users/USERNAME/Library/Application Support/Dock/desktoppicture.db</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!--
+        launchd stdout/stderr capture (literal home path, same reason as
+        above). The script also logs to ~/Library/Logs/CompanyName/wallpaperSync.log
+        independent of these keys.
+    -->
+    <key>StandardOutPath</key>
+    <string>/Users/USERNAME/Library/Logs/CompanyName/wallpaperSync.agent.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/USERNAME/Library/Logs/CompanyName/wallpaperSync.agent.err.log</string>
+</dict>
+</plist>

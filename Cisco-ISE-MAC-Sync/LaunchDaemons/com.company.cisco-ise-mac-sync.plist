@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+        Reference copy only: Cisco-ISE-MAC-Sync.sh writes this plist itself
+        from a heredoc during install. Values below assume the script's
+        default ORG_PLIST_DOMAIN ("com.company") and ORG_NAME_FRIENDLY
+        ("Company Name" -> path-safe "CompanyName"). CHANGE_ME if you change
+        those in the script.
+        Label MUST match the plist filename and the BUNDLE_ID in the script.
+    -->
+    <key>Label</key>
+    <string>com.company.cisco-ise-mac-sync</string>
+
+    <!-- Invoke the script directly with --run -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Library/Application Support/CompanyName/_SCRIPTS/Cisco_ISE_MAC_SYNC/Cisco-ISE-MAC-Sync.sh</string>
+        <string>--run</string>
+    </array>
+
+    <!-- Run as root (default for /Library/LaunchDaemons, stated explicitly) -->
+    <key>UserName</key>
+    <string>root</string>
+    <key>GroupName</key>
+    <string>wheel</string>
+
+    <!--
+        Triggers:
+          1. Jamf recon events: /var/log/jamf.log is appended to during
+             every recon. WatchPaths fires when the mtime changes.
+          2. Network interface state changes: the SystemConfiguration
+             plist is rewritten when interfaces come up/down (e.g.
+             Ethernet plug/unplug).
+          3. Safety-net timer: StartInterval ensures we self-heal even
+             if we missed a trigger (e.g. script crashed, daemon was
+             bootout'd and reloaded mid-recon).
+    -->
+    <key>WatchPaths</key>
+    <array>
+        <string>/var/log/jamf.log</string>
+        <string>/Library/Preferences/SystemConfiguration/NetworkInterfaces.plist</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>300</integer>
+
+    <!-- Let the script own its lifecycle; don't respawn on non-zero exits -->
+    <key>KeepAlive</key>
+    <false/>
+    <key>RunAtLoad</key>
+    <false/>
+
+    <!-- Cap resource usage so a bug can't pin a CPU or spawn forever -->
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>Nice</key>
+    <integer>5</integer>
+
+    <!-- Throttle: launchd will ignore triggers that come in within 10s
+         of the previous spawn. Combined with the in-script debounce
+         file, this double-protects against rapid jamf.log flap. -->
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <!-- ExitTimeOut: seconds launchd waits after SIGTERM before sending
+         SIGKILL when the job is stopped (e.g. bootout). It is not a cap
+         on run time. Normal runs complete in under 10s; the longest
+         waits are jamf-idle (150s) and VPN reconnect (60s). -->
+    <key>ExitTimeOut</key>
+    <integer>30</integer>
+
+    <!-- Redirect stdout/stderr to the same file the script logs to.
+         Structured log lines go via logger; this only catches anything
+         that escapes the logging framework (e.g. early-exit stack
+         traces, launchctl output). -->
+    <key>StandardOutPath</key>
+    <string>/var/log/com.company.cisco-ise-mac-sync.log</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/com.company.cisco-ise-mac-sync.log</string>
+</dict>
+</plist>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    ManagedLoginItems-wallpapersync.mobileconfig
+
+    Pre-approves the Wallpaper Sync LaunchAgent as a Managed Login Item so that,
+    on macOS Ventura (13) and later, it is NOT surfaced to the user as an
+    unapproved background item in System Settings > General > Login Items, and
+    runs reliably without waiting on manual user approval.
+
+    PAYLOAD SCHEMA (verified against Apple's ServiceManagementManagedLoginItems
+    device-management documentation):
+      - PayloadType: com.apple.servicemanagement
+      - Rules: an array of rule dictionaries, each with:
+          * RuleType  (required)  one of:
+                TeamIdentifier | BundleIdentifier | BundleIdentifierPrefix
+                | Label | LabelPrefix
+          * RuleValue (required)  the value to match for that RuleType
+          * Comment   (optional)  human-readable description
+
+    WHY RuleType = Label (not TeamIdentifier):
+      This is a plain, UNSIGNED bash LaunchAgent — there is no code signature
+      and therefore no Team Identifier to match. The correct and reliable match
+      for an unsigned launchd job is its launchd `Label`. RuleValue below MUST
+      be identical to the Label key in com.company.wallpapersync.agent.plist.
+
+    DEPLOYMENT:
+      - Must be delivered by MDM (Jamf). This payload cannot be installed
+        manually by double-clicking.
+      - Deploy TOGETHER with the LaunchAgent (same policy / PreStage). If Label
+        matching misbehaves on your OS build, sign the .mobileconfig before
+        upload — signed profiles are the documented remedy for flaky Label rules.
+
+    >>> EDIT ME <<<  Replace every "company" / "CompanyName" occurrence with your
+    org identifier (match ORG_PLIST_DOMAIN in Deploy-Wallpaper-Sync.sh). The
+    RuleValue Label MUST stay in sync with the LaunchAgent Label, which the
+    installer builds as ${ORG_PLIST_DOMAIN}.wallpapersync.agent.
+
+    CHANGE_ME: replace both REPLACE-WITH-UUID-* PayloadUUID values with unique
+    values from `uuidgen` (one per payload) before uploading.
+-->
+<plist version="1.0">
+<dict>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadScope</key>
+    <string>System</string>
+    <key>PayloadDisplayName</key>
+    <string>Managed Login Items — Wallpaper Sync</string>
+    <key>PayloadDescription</key>
+    <string>Pre-approves the Wallpaper Sync LaunchAgent as a Managed Login Item so it runs without user approval on macOS 13+.</string>
+    <key>PayloadOrganization</key>
+    <string>Company Name</string>
+    <key>PayloadIdentifier</key>
+    <string>com.company.wallpapersync.managedloginitems</string>
+    <key>PayloadUUID</key>
+    <string>REPLACE-WITH-UUID-PROFILE</string>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.servicemanagement</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadIdentifier</key>
+            <string>com.company.wallpapersync.managedloginitems.servicemanagement</string>
+            <key>PayloadUUID</key>
+            <string>REPLACE-WITH-UUID-PAYLOAD</string>
+            <key>PayloadDisplayName</key>
+            <string>Login and Background Item Management — Wallpaper Sync</string>
+            <key>Rules</key>
+            <array>
+                <dict>
+                    <key>Comment</key>
+                    <string>Wallpaper Sync user LaunchAgent (unsigned bash — matched by launchd Label)</string>
+                    <key>RuleType</key>
+                    <string>Label</string>
+                    <key>RuleValue</key>
+                    <string>com.company.wallpapersync.agent</string>
+                </dict>
+            </array>
+        </dict>
+    </array>
+</dict>
+</plist>

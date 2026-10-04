@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    Custom Settings (Application & Custom Settings) payload VALUES plist for the
+    EntraAccountPhoto script's CRED_SOURCE=profile / auto mode.
+
+    Preference domain: com.company.entraphoto
+      (must equal CONFIG_PROFILE_DOMAIN in the script = ${ORG_PLIST_DOMAIN}.entraphoto;
+       update BOTH if you use a different domain)
+
+    In Jamf Pro:
+      Computers > Configuration Profiles > New
+        > Application & Custom Settings > Custom Settings (Upload/External)
+        > Preference Domain: com.company.entraphoto
+        > Upload this plist as the property list.
+      Scope to the same Macs as the policy. Deliver device-wide (Level: Computer)
+      so it lands at /Library/Managed Preferences/com.company.entraphoto.plist
+      (root-readable only).
+
+    AUTH — provide ClientID + TenantID, then ONE of:
+      * CertificatePEM (PREFERRED) — a single PEM containing BOTH the certificate
+        AND its private key. The script signs a PS256 client assertion with it.
+        Upload the matching *public* certificate (.cer/.crt) to the Entra app
+        registration (Certificates & secrets > Certificates). To build the PEM:
+            openssl req -x509 -newkey rsa:2048 -nodes \
+                -keyout key.pem -out cert.pem -days 730 -subj "/CN=EntraAccountPhoto"
+            cat cert.pem key.pem > entra-graph.pem     # paste this file's contents below
+            openssl x509 -in cert.pem -outform DER | openssl dgst -sha256   # (optional) thumbprint
+        Then upload cert.pem (public cert only) to Entra.
+      * ClientSecret (FALLBACK) — remove the CertificatePEM key and set this
+        instead if you are not using certificate auth.
+
+    SECURITY: anyone who can read this profile in Jamf can read the private key /
+    secret. Restrict who can view Configuration Profiles, use a dedicated app
+    registration scoped to User.Read.All only, and rotate on a schedule.
+
+    Delete whichever auth key you are NOT using. Replace all REPLACE-WITH-* values.
+-->
+<plist version="1.0">
+<dict>
+    <key>ClientID</key>
+    <string>REPLACE-WITH-CLIENT-ID</string>
+    <key>TenantID</key>
+    <string>REPLACE-WITH-TENANT-ID</string>
+
+    <!-- PREFERRED: certificate auth. Replace the placeholder with the full
+         contents of entra-graph.pem (certificate block first, then the
+         private-key block), keeping every BEGIN/END line and line break. -->
+    <key>CertificatePEM</key>
+    <string>REPLACE-WITH-COMBINED-CERTIFICATE-AND-PRIVATE-KEY-PEM</string>
+
+    <!-- FALLBACK: secret auth. Delete CertificatePEM above and uncomment this
+         if you are not using a certificate.
+    <key>ClientSecret</key>
+    <string>REPLACE-WITH-CLIENT-SECRET</string>
+    -->
+</dict>
+</plist>

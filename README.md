@@ -6,7 +6,23 @@ A collection of my Bash, Jamf, and Python scripts.
 
 ## Contents
 
-See **[CONTENTS.md](CONTENTS.md)** for the list of scripts and what each one does. Each script also keeps its own usage notes in a header comment.
+See **[CONTENTS.md](CONTENTS.md)** for the list of tools and what each one does. Each script also keeps its own usage notes in a header comment.
+
+## Layout
+
+Each tool has its own folder. Inside it, files are grouped by type, and only the folders a tool needs are present:
+
+```
+<Tool-Name>/
+├── Scripts/                 # Bash scripts: Jamf policy script payloads
+├── ExtensionAttributes/     # Jamf Extension Attribute scripts
+├── LaunchDaemons/           # LaunchDaemon plists (reference copies)
+├── LaunchAgents/            # LaunchAgent plists (reference copies)
+├── ConfigurationProfiles/   # .mobileconfig and Custom Settings payloads
+└── DOCS/                    # Deployment, tech support, and user guides
+```
+
+Self-installing scripts write their own LaunchDaemon or LaunchAgent plists at install time; the copies in `LaunchDaemons/` and `LaunchAgents/` are for reference. MDM terms in the guides link to the shared [Apple Platform Glossary](apple-platform-glossary.md).
 
 ## Requirements
 

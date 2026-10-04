@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EntraAccountPhoto — Microsoft Graph Credentials",
+  "description": "Credentials for Entra-Account-Photo.sh (CRED_SOURCE=profile/auto). Preference Domain 'com.company.entraphoto' must equal CONFIG_PROFILE_DOMAIN in the script. Provide Client ID + Tenant ID, then EXACTLY ONE of Certificate PEM (preferred) or Client Secret. Deliver at Computer level so it lands at /Library/Managed Preferences/<domain>.plist.",
+  "__version": "1.0",
+  "type": "object",
+  "properties": {
+    "ClientID": {
+      "title": "Client ID",
+      "description": "Entra app registration Application (client) ID (GUID). Required.",
+      "type": "string",
+      "default": "",
+      "property_order": 10
+    },
+    "TenantID": {
+      "title": "Tenant ID",
+      "description": "Entra Directory (tenant) ID (GUID) or a verified domain. Required.",
+      "type": "string",
+      "default": "",
+      "property_order": 20
+    },
+    "CertificatePEM": {
+      "title": "Certificate PEM (preferred auth)",
+      "description": "PREFERRED. Full combined PEM containing BOTH the certificate block AND its private-key block (PKCS#8), with all BEGIN/END lines kept. The script signs a PS256 client assertion with it; upload only the matching PUBLIC certificate to the Entra app registration. Leave blank if using Client Secret instead.",
+      "type": "string",
+      "format": "textarea",
+      "default": "",
+      "property_order": 30
+    },
+    "ClientSecret": {
+      "title": "Client Secret (fallback auth)",
+      "description": "FALLBACK. Entra app client secret VALUE, used only when Certificate PEM is blank. Anyone who can read this profile in Jamf can read it — prefer certificate auth. Leave blank if using Certificate PEM.",
+      "type": "string",
+      "default": "",
+      "property_order": 40
+    }
+  },
+  "required": [
+    "ClientID",
+    "TenantID"
+  ]
+}
