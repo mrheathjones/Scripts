@@ -6,7 +6,7 @@
 # Name: Erase-And-Delete-Devices.sh
 # Author: Heath Jones
 # Date: 07-01-2026
-# Modified: 07-01-2026
+# Modified: 10-04-2026
 # Purpose: Admin tool — pull managed computers from the Jamf Pro API, let an
 #          admin pick one or more from a searchable swiftDialog list, queue an
 #          EraseDevice MDM command to each, and (after acknowledgment) delete
@@ -70,6 +70,12 @@
 #                 swiftDialog called out as the key REQUIRED dependency. Local
 #                 brandingBanner/appIcon paths replaced with CHANGE_ME
 #                 placeholder subpaths (online fallbacks retained).
+# Version: 1.17-SANITIZED - ShellCheck clean: SC2230/SC2155 disabled file-wide
+#                 with justification (directive moved before the first command
+#                 so it applies to the whole file), plus SC2016 for single-quoted
+#                 jq/awk programs; per-line SC2034 disables on unused template
+#                 dialog-size constants and SC2329 on the trap-invoked cleanup().
+#                 No behavior change.
 #
 # Requirements:
 #   - Run as root (Jamf policy) on a Jamf-enrolled Mac — reads jss_url from the
@@ -138,14 +144,21 @@
 ### MODIFY AT YOUR OWN RISK ##
 ##############################
 
+# File-wide ShellCheck directives (must precede the first command):
+#   SC2230 - `which` is preferred over `command -v` per the style guide.
+#   SC2155 - `readonly NAME=$(which ...)` / `readonly NAME=$(cmd)` is the
+#            template's binary-path and metadata convention; these
+#            assignments are not checked for failure by design.
+#   SC2016 - jq and awk programs are single-quoted on purpose; their `$`
+#            references belong to jq/awk, not the shell.
+# shellcheck disable=SC2230,SC2155,SC2016
 set -euo pipefail
 
 # Ensure PATH is set so `which` resolves reliably in any execution context
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 # Binary paths (add task-specific binaries to User Defined Variables)
-# `which` is preferred over `command -v` per the style guide, so the directive below is deliberate.
-# shellcheck disable=SC2230
+# `which` is preferred over `command -v` per the style guide (SC2230 disabled file-wide above).
 readonly AWK=$(which awk)
 readonly BASENAME=$(which basename)
 readonly DATE=$(which date)
@@ -167,7 +180,7 @@ readonly ORG_PLIST_DOMAIN="com.replaceme"             # reverse-DNS, e.g. "com.a
 
 # Script metadata
 readonly SCRIPT_NAME=$("${BASENAME}" "$0")
-readonly SCRIPT_VERSION="1.16-SANITIZED"
+readonly SCRIPT_VERSION="1.17-SANITIZED"
 readonly LOG_LABEL="${ORG_PLIST_DOMAIN}.${SCRIPT_NAME%.sh}"
 readonly TIMESTAMP=$("${DATE}" +%Y%m%d_%H%M%S)
 readonly JAMF_LOG="/var/log/jamf.log"
@@ -229,15 +242,20 @@ then
     # app icon url if local file doesn't exist (generic public placeholder)
     appIcon="https://raw.githubusercontent.com/github/explore/main/topics/apple/apple.png"
 fi
+# Template constant kept for consistency across scripts; not every dialog here uses it.
+# shellcheck disable=SC2034
 appIconSize=125
 # Larger icon size (px) for the photorealistic device image on the confirmation
 # and summary dialogs (swiftDialog default is 150). Bump this to taste.
 deviceIconSize=240
 
 # ── Dialog Size Constants ────────────────────────────────────────────────────
+# Full template size set; XSmall and Large are unused by this script's dialogs.
+# shellcheck disable=SC2034
 appSizeXSmall=250
 appSizeSmall=500
 appSizeMedium=650
+# shellcheck disable=SC2034
 appSizeLarge=800
 appSizeXLarge=1000
 
@@ -407,6 +425,8 @@ create_temp_file() {
 }
 
 # ── Cleanup (trapped on EXIT/INT/TERM) ───────────────────────────────────────
+# Invoked via `trap cleanup EXIT INT TERM`, which ShellCheck cannot see.
+# shellcheck disable=SC2329
 cleanup() {
     local exit_code=$?
     # Close any lingering background progress dialog first (quit, then force-kill
