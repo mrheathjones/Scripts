@@ -26,6 +26,19 @@ the shared [Apple Platform Glossary](apple-platform-glossary.md).
   the `REPLACE_ME` / `CHANGE_ME` values (org identity, Jamf API client, optional
   Entra app, branding assets) before use. swiftDialog is a hard dependency.
 
+## App installation
+
+- **[Install-Microsoft-App](Install-Microsoft-App/)**: Jamf policy script that
+  installs or updates one Microsoft app chosen by parameter 4 (Word, Excel,
+  PowerPoint, Outlook, OneNote, OneDrive, Teams, Company Portal, Edge, Windows
+  App, Visual Studio Code, Copilot, or Microsoft AutoUpdate). Downloads straight
+  from Microsoft, refuses anything not signed under Microsoft's Developer ID
+  Team ID, installs packages with `installer` (Teams with its choice-changes
+  file) and Visual Studio Code from its universal DMG via `diskutil image
+  attach` on macOS 26+ with an `hdiutil` fallback. No prompts, no restarts.
+  `DOCS/` holds a [Monocle](https://github.com/dan-snelson/Monocle) review
+  report of version 1.3 (score 90/100) with the remaining reliability items.
+
 ## Enrollment and onboarding
 
 - **[Install-Run-Policy-Dialog](Install-Run-Policy-Dialog/)**: Installs a
